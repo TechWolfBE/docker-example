@@ -1,0 +1,32 @@
+ARG UID=1000
+ARG GID=1000
+
+# Layer 1: Base image (OS and preinstalled software)
+FROM python:3.13.3-slim
+ARG UID
+ARG GID
+
+# Layer 2: Set environment variables
+ENV HELLO_WORLD="UGR"
+
+# Layer 3: Create user
+RUN groupadd -g $GID ugr && useradd -m ugr -u $UID -g $GID
+
+# Layer 4: Set user
+USER ugr
+
+# Layer 5: Set working directory
+WORKDIR /home/ugr
+
+# Layer 6: Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Layer 7: Copy application source code
+COPY --chown=ugr:ugr . .
+
+# Layer 8: Expose port
+EXPOSE 8000
+
+# Layer 9: Set default command to run the app
+CMD ["python", "main.py"]
